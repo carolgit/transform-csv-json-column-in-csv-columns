@@ -9,7 +9,7 @@ function isJson(str) {
 }
 
 class Organizer {
-    static lines = 0;
+    static lines = -1;
 
     constructor() {
 
@@ -20,6 +20,7 @@ class Organizer {
             worker: true,
             step: function (row) {
                 // console.log("Row:", row.data);
+                nonJsonColumn(row);
                 AlgasFormatter.formatIrregularJsonColumn(row.data[2], Organizer.lines);
                 Organizer.lines = Organizer.lines + 1;
             },
@@ -90,16 +91,16 @@ function addNulls(){
     var beforeJson = {};
     var afterJson = {};
     Object.keys(tempJson).forEach(function(key) {
-        let size = tempJson[key].values.length -1;
+        let size = tempJson[key].values.length;
         if(size!=Organizer.lines){
+            // size = size -1;
             current_line = tempJson[key].line;
-            // let qtde_before = Math.abs(Organizer.lines - current_line);
             let qtde_before = current_line;
             let qtde_after = Math.abs(Organizer.lines -(qtde_before + size));
-            // console.log(qtde_after,qtde_before, size ,Organizer.lines, (qtde_after+qtde_before+size));
-            beforeJson = addNullBefore(key, qtde_before, tempJson);
-            afterJson = addNullAfter(key, qtde_after, beforeJson);
-            if((qtde_after+qtde_before+size)!=Organizer.lines){
+            if((qtde_after+qtde_before+size)==Organizer.lines){
+                beforeJson = addNullBefore(key, qtde_before, tempJson);
+                afterJson = addNullAfter(key, qtde_after, beforeJson);
+            }else{
                 console.log("Não ISSO!", key);
             }
         }
@@ -127,4 +128,17 @@ function transpose(a) {
     return Object.keys(a[0]).map(function(c) {
         return a.map(function(r) { return r[c]; });
     });
+}
+
+// name	timestamp_device
+function nonJsonColumn(row){
+    var name = row.data[0];
+    var timestamp_device = row.data[1];
+    if(name=="name" && timestamp_device=="timestamp_device"){
+        tempJson[name]={values:[]};
+        tempJson[timestamp_device]={values:[]};
+    }else{
+        tempJson["name"]["values"].push(name);
+        tempJson["timestamp_device"]["values"].push(timestamp_device);
+    }
 }
